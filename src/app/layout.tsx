@@ -5,8 +5,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Gaku.LK',
-  description: 'Online Learning Platform',
+  title: 'Master Academy',
+  description: 'Learn IT from experts in the IT idustry',
 }
 
 export default function RootLayout({

@@ -45,7 +45,8 @@ body {
   @apply mr-2 leading-tight;
 }
 
-.form-field input[type="radio"] {
+.form-field input[type="radio"], 
+.form-field input[type="checkbox"] {
   @apply w-8;
 }
 
@@ -74,3 +75,9 @@ body {
 .card {
   @apply shadow border bg-white rounded;
 }
+
+/** buttons **/
+.btn-accent {
+  @apply px-8 py-2 bg-gradient-to-r from-purple-500 to-amber-500 text-white font-bold rounded-full transition-transform transform-gpu hover:-translate-y-1 hover:shadow-lg border
+}
+/** end buttons **/

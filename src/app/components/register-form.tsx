@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
 import { useState } from "react";
-import { registerStudent } from "../lib/actions/student-actions"
+import { registerStudent } from "../lib/actions/student-actions";
 import { Form } from "./common/form";
 import { FormField } from "./common/form-field";
 import { useValidation } from "../lib/hooks/useValidation";
@@ -12,32 +12,50 @@ import { districts } from "../lib/data/districts";
 import { useHttp } from "../lib/hooks/useHttp";
 
 type FormDataType = {
-  name: string,
-  school: string,
-  gender: string,
-  mobile: string,
-  whatsapp: string,
-  district: string,
-  address: string,
-  email: string
-}
+  name: string;
+  school: string;
+  gender: string;
+  mobile: string;
+  whatsapp: string;
+  email: string;
+  courses: number[];
+};
 
-const phoneRegex = new RegExp('^0[1-9]{1}[0-9]{7,9}');
+const phoneRegex = new RegExp("^0[1-9]{1}[0-9]{7,9}");
 
 const schema = Joi.object({
-  name: Joi.string().label('Name').required().min(12),
-  dob: Joi.string().label('Date of Birth').required().isoDate().message('Not a valid date format'),
-  gender: Joi.string().label('Gender').required().valid('male', 'female'),
-  mobile: Joi.string().label('Mobile').required().regex(phoneRegex).message('Not a valid mobile no'),
-  whatsapp: Joi.string().label('WhatsApp').required().regex(phoneRegex).message('Not a valid WhatsApp no'),
-  email: Joi.string().label('Email').required().email({ tlds: { allow: false } }),
-  password: Joi.string().label('Password').required()
+  name: Joi.string().label("Name").required().min(12),
+  dob: Joi.string()
+    .label("Date of Birth")
+    .required()
+    .isoDate()
+    .message("Not a valid date format"),
+  gender: Joi.string().label("Gender").required().valid("male", "female"),
+  mobile: Joi.string()
+    .label("Mobile")
+    .required()
+    .regex(phoneRegex)
+    .message("Not a valid mobile no"),
+  whatsapp: Joi.string()
+    .label("WhatsApp")
+    .required()
+    .regex(phoneRegex)
+    .message("Not a valid WhatsApp no"),
+  email: Joi.string()
+    .label("Email")
+    .required()
+    .email({ tlds: { allow: false } }),
+  password: Joi.string().label("Password").required(),
+  courses: Joi.array().items(Joi.number()).label("Courses").required(),
 });
 
+const courseSelection = {1: false, 2: false, 3: false};
+
 export const RegisterForm = () => {
+  const [courses, setCourses] = useState(courseSelection);
   const [submitting, setSubmitting] = useState(false);
   const { handleChange, isValid, values, errors } = useValidation(schema, {});
-  const [alert, setAlert] = useState('');
+  const [alert, setAlert] = useState("");
   const { httpPost } = useHttp();
 
   const submit = async (event: any) => {
@@ -45,107 +63,157 @@ export const RegisterForm = () => {
     setSubmitting(true);
     if (!isValid()) {
       setSubmitting(false);
-      setAlert('Please correct the invalid fields and try again.');
+      setAlert("Please correct the invalid fields and try again.");
       return;
     }
 
-    httpPost('/api/register', values)
+    httpPost("/api/register", values)
       .then((data) => {
         console.log(data);
       })
-      .catch(response => {
+      .catch((response) => {
         console.log(response.error.message);
       })
       .finally(() => setSubmitting(false));
+  };
+
+  const hangleCourseChange = (event: any) => {
+    //
   }
 
-  return <>
-    <Form formData={{ values, errors }} onSubmit={submit}>
-      <FormField name="name" title="Name">
-        <input
-          type="text"
-          name="name"
-          autoFocus={true}
-          defaultValue={values?.name}
-          onChange={handleChange}
-        />
-      </FormField>
-      <FormField name="email" title="Email">
-        <input
-          type="email"
-          name="email"
-          defaultValue={values?.email}
-          onChange={handleChange}
-        />
-      </FormField>
-      <div className="flex gap-3">
-        <FormField name="dob" title="Date of Birth">
-          <input
-            type="date"
-            name="dob"
-            defaultValue={values?.dob}
-            onChange={handleChange}
-          />
-        </FormField>
-        <FormField name="gender" title="Gender">
-          <div className="flex gap-2 py-2">
-            <div className="flex">
-              <input
-                id="maleId"
-                name="gender"
-                type="radio"
-                value="male"
-                defaultValue={values?.gender}
-                onChange={handleChange}
-              />
-              <label htmlFor="maleId">Male</label>
-            </div>
-            <div className="flex">
-              <input
-                id="femaleId"
-                name="gender"
-                type="radio"
-                value="female"
-                defaultValue={values?.gender}
-                onChange={handleChange}
-              />
-              <label htmlFor="femaleId">Female</label>
-            </div>
-          </div>
-        </FormField>
-      </div>
-      <div className="flex gap-3">
-        <FormField name="mobile" title="Mobile">
+  return (
+    <>
+      <Form formData={{ values, errors }} onSubmit={submit}>
+        <FormField name="name" title="Name">
           <input
             type="text"
-            name="mobile"
-            defaultValue={values?.mobile}
+            name="name"
+            autoFocus={true}
+            defaultValue={values?.name}
             onChange={handleChange}
           />
         </FormField>
-        <FormField name="whatsapp" title="WhatsApp">
+        <FormField name="email" title="Email">
           <input
-            type="text"
-            name="whatsapp"
-            defaultValue={values?.whatsapp}
+            type="email"
+            name="email"
+            defaultValue={values?.email}
             onChange={handleChange}
           />
         </FormField>
-      </div>
-      <hr className="my-3" />
-      <FormField name="password" title="Password">
-        <input
-          type="password"
-          name="password"
-          defaultValue={values?.password}
-          onChange={handleChange}
-        />
-        <small>Allowed letters, numbers and special characters. Minimum 8 characters long.</small>
-      </FormField>
-      <div className="flex justify-end mb-3">
-        <Button type="submit" disabled={submitting} className="px-5">Register</Button>
-      </div>
-      {alert && ErrorIndicator({ message: alert })}
-    </Form>
-  </>
-}
+        <div className="flex gap-3">
+          <FormField name="dob" title="Date of Birth">
+            <input
+              type="date"
+              name="dob"
+              defaultValue={values?.dob}
+              onChange={handleChange}
+            />
+          </FormField>
+          <FormField name="gender" title="Gender">
+            <div className="flex gap-2 py-2">
+              <div className="flex">
+                <input
+                  id="maleId"
+                  name="gender"
+                  type="radio"
+                  value="male"
+                  defaultValue={values?.gender}
+                  onChange={handleChange}
+                />
+                <label htmlFor="maleId">Male</label>
+              </div>
+              <div className="flex">
+                <input
+                  id="femaleId"
+                  name="gender"
+                  type="radio"
+                  value="female"
+                  defaultValue={values?.gender}
+                  onChange={handleChange}
+                />
+                <label htmlFor="femaleId">Female</label>
+              </div>
+            </div>
+          </FormField>
+        </div>
+        <div className="flex gap-3">
+          <FormField name="mobile" title="Mobile">
+            <input
+              type="text"
+              name="mobile"
+              defaultValue={values?.mobile}
+              onChange={handleChange}
+            />
+          </FormField>
+          <FormField name="whatsapp" title="WhatsApp">
+            <input
+              type="text"
+              name="whatsapp"
+              defaultValue={values?.whatsapp}
+              onChange={handleChange}
+            />
+          </FormField>
+        </div>
+        <hr className="my-3" />
+        <FormField name="password" title="Password">
+          <input
+            type="password"
+            name="password"
+            defaultValue={values?.password}
+            onChange={handleChange}
+          />
+          <small>
+            Allowed letters, numbers and special characters. Minimum 8
+            characters long.
+          </small>
+        </FormField>
+        <div>
+          <FormField name="courses" title="Courses you intend to participate">
+            <div>
+              <label htmlFor="check1Id">
+                <input
+                  id="check1Id"
+                  type="checkbox"
+                  name="courses"
+                  value={1}
+                  checked={values?.courses?.includes(1)}
+                  onChange={hangleCourseChange}
+                />
+                Free Workshop
+              </label>
+              <label htmlFor="check2Id">
+                <input
+                  id="check2Id"
+                  type="checkbox"
+                  name="courses"
+                  value={2}
+                  checked={values?.courses?.includes(2)}
+                  onChange={hangleCourseChange}
+                />
+                FrontEnd Developer
+              </label>
+              <label htmlFor="check3Id">
+                <input
+                  id="check3Id"
+                  type="checkbox"
+                  name="courses"
+                  value={3}
+                  checked={values?.courses?.includes(3)}
+                  onChange={hangleCourseChange}
+                />
+                BackEnd Developer
+              </label>
+            </div>
+          </FormField>
+        </div>
+        <div className="flex justify-end mb-3">
+          <Button type="submit" disabled={submitting} className="px-5">
+            Register
+          </Button>
+        </div>
+        {alert && ErrorIndicator({ message: alert })}
+      </Form>
+    </>
+  );
+};

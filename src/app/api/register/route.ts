@@ -1,13 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
 import { NextResponse } from 'next/server';
  
-type ResponseData = {
-  message: string
-}
- 
-export function POST(
-  req: NextApiRequest
-) {
-  const data = req.body();
-  return NextResponse.json(data);
+export async function POST(req: Request) {
+  const body = await req.json();
+  return NextResponse.json(req.body);
 }
